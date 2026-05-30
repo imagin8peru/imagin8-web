@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>imagin8 — diseño · foto · video · IA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -34,23 +34,28 @@
   /* CURSOR */
   .cursor {
     position: fixed;
+    top: 0; left: 0;
     width: 10px; height: 10px;
     background: var(--orange);
     border-radius: 50%;
     pointer-events: none;
     z-index: 9999;
-    transition: transform 0.1s ease;
     mix-blend-mode: normal;
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
   }
   .cursor-ring {
     position: fixed;
+    top: 0; left: 0;
     width: 36px; height: 36px;
     border: 1.5px solid var(--orange);
     border-radius: 50%;
     pointer-events: none;
     z-index: 9998;
-    transition: transform 0.15s ease, width 0.3s ease, height 0.3s ease, opacity 0.3s ease;
     opacity: 0.5;
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
+    transition: width 0.3s ease, height 0.3s ease, opacity 0.3s ease;
   }
 
   /* NAV */
@@ -67,9 +72,10 @@
     color: var(--white);
     text-decoration: none;
     letter-spacing: -0.5px;
+    z-index: 110;
   }
   .nav-logo span { color: var(--orange); }
-  .nav-links { display: flex; gap: 40px; list-style: none; }
+  .nav-links { display: flex; gap: 40px; list-style: none; align-items: center; }
   .nav-links a {
     font-size: 13px; font-weight: 400;
     color: var(--text-muted);
@@ -92,6 +98,25 @@
   }
   .nav-cta:hover { background: var(--orange-dark) !important; color: var(--white) !important; }
 
+  /* NAV MOBILE TOGGLE */
+  .nav-toggle {
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 24px;
+    height: 16px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    z-index: 110;
+  }
+  .nav-toggle span {
+    width: 100%;
+    height: 2px;
+    background-color: var(--white);
+    transition: all 0.3s ease;
+  }
+
   /* HERO */
   .hero {
     min-height: 100vh;
@@ -102,13 +127,14 @@
   }
   .hero-bg-8 {
     position: absolute;
-    right: -60px; top: 50%;
+    right: -100px; top: 50%;
     transform: translateY(-50%);
-    width: 520px;
-    opacity: 0.15;
+    width: 2000px;
+    height: 850px;
+    opacity: 1.0;
     mix-blend-mode: screen;
-    pointer-events: none;
     user-select: none;
+    z-index: 2;
   }
   .hero-content { position: relative; z-index: 2; max-width: 780px; }
   .hero-tag {
@@ -232,9 +258,50 @@
     width: 0; height: 3px;
     background: var(--orange);
     transition: width 0.4s ease;
+    z-index: 4;
+  }
+  /* Spotlight glow overlay */
+  .service-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(241, 90, 36, 0.09) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+    z-index: 2;
   }
   .service-card:hover { background: #1e1c19; }
   .service-card:hover::before { width: 100%; }
+  .service-card:hover::after { opacity: 1; }
+
+  /* Background images for service cards */
+  .service-card-bg-img {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-size: cover;
+    background-position: center;
+    opacity: 0.12; /* Default watermark opacity */
+    mix-blend-mode: luminosity;
+    filter: grayscale(100%) contrast(105%);
+    transition: opacity 0.5s ease, filter 0.5s ease, mix-blend-mode 0.5s ease, transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+    z-index: 1;
+    pointer-events: none;
+  }
+  .service-card:hover .service-card-bg-img {
+    opacity: 0.35; /* Fades in color details */
+    filter: grayscale(0%) contrast(115%);
+    mix-blend-mode: normal;
+    transform: scale(1.08) translate3d(var(--px, 0px), var(--py, 0px), 0); /* 3D Parallax shift */
+  }
+
+  /* Text and tags overlay above image & spotlight */
+  .service-card > *:not(.service-card-bg-img) {
+    position: relative;
+    z-index: 3;
+  }
+
   .service-card-num {
     font-family: 'Josefin Sans', sans-serif;
     font-size: 11px; font-weight: 600;
@@ -269,17 +336,70 @@
   }
   .service-card:hover .service-tag { border-color: rgba(241,90,36,0.3); color: var(--white); }
   .service-card-bg-num {
-    position: absolute; right: -20px; bottom: -30px;
+    position: absolute !important; right: -20px; bottom: -30px;
     font-family: 'Josefin Sans', sans-serif;
     font-size: 180px; font-weight: 600;
     color: transparent;
     -webkit-text-stroke: 1px rgba(255,255,255,0.03);
     pointer-events: none; user-select: none; line-height: 1;
+    z-index: 1;
+  }
+
+  /* PORTAFOLIO */
+  .portfolio { background: var(--black); }
+  .portfolio-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 80px; }
+  .portfolio-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 40px; }
+  .portfolio-item {
+    position: relative;
+    overflow: hidden;
+    border-radius: 4px;
+    cursor: none;
+  }
+  .portfolio-image-wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    border-radius: 2px;
+    background: var(--gray);
+  }
+  .portfolio-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+  .portfolio-item:hover .portfolio-img {
+    transform: scale(1.05);
+  }
+  .portfolio-info {
+    margin-top: 20px;
+  }
+  .portfolio-category {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 8px;
+  }
+  .portfolio-title {
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    letter-spacing: -0.5px;
+  }
+  .portfolio-desc {
+    font-size: 14px;
+    color: var(--text-muted);
+    font-weight: 300;
   }
 
   /* PROCESO */
-  .proceso { background: var(--black); }
-  .proceso-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
+  .proceso { background: var(--dark); overflow: hidden; }
+  .proceso-inner { display: grid; grid-template-columns: minmax(auto, 480px) 1fr; gap: 80px; align-items: start; }
+  .proceso-info { max-width: 480px; width: 100%; }
   .proceso-steps { margin-top: 60px; }
   .proceso-step {
     display: flex; gap: 24px;
@@ -302,24 +422,25 @@
   .proceso-step-desc { font-size: 14px; color: var(--text-muted); line-height: 1.7; font-weight: 300; }
   .proceso-visual {
     position: sticky; top: 120px;
-    display: flex; align-items: center; justify-content: center;
+    height: 750px;
+    width: 100%;
   }
-  .proceso-8 {
-    font-family: 'Josefin Sans', sans-serif;
-    font-size: 320px; font-weight: 600;
-    color: transparent;
-    -webkit-text-stroke: 2px var(--orange);
-    opacity: 0.15;
-    line-height: 1;
-    animation: float 6s ease-in-out infinite;
+  .proceso-visual canvas {
+    position: absolute;
+    left: 0;
+    right: -100px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: auto;
+    height: 750px;
+    display: block;
   }
-  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-20px)} }
 
   /* POR QUÉ */
-  .porqué { background: var(--dark); }
+  .porqué { background: var(--black); }
   .porqué-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; margin-top: 72px; }
   .porqué-item {
-    background: var(--black);
+    background: var(--dark);
     padding: 48px 40px;
     border-bottom: 3px solid transparent;
     transition: border-color 0.3s;
@@ -466,14 +587,52 @@
   /* MOBILE */
   @media (max-width: 768px) {
     nav { padding: 20px 24px; }
-    .nav-links { display: none; }
+    
+    .nav-toggle {
+      display: flex;
+    }
+    
+    .nav-links {
+      position: fixed;
+      top: 0;
+      right: -100%;
+      width: 100%;
+      height: 100vh;
+      background: var(--black);
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 30px;
+      transition: right 0.4s ease;
+      z-index: 105;
+      padding: 0;
+    }
+    
+    .nav-links.active {
+      right: 0;
+    }
+    
+    .nav-toggle.active span:nth-child(1) {
+      transform: translateY(7px) rotate(45deg);
+    }
+    .nav-toggle.active span:nth-child(2) {
+      opacity: 0;
+    }
+    .nav-toggle.active span:nth-child(3) {
+      transform: translateY(-7px) rotate(-45deg);
+    }
+
     section { padding: 96px 24px; }
     .hero { padding: 120px 24px 220px; }
-    .hero-bg-8 { font-size: 280px; right: -40px; }
+    .hero-bg-8 { display: none; }
     .hero-services-strip { left: 24px; right: 24px; flex-wrap: wrap; gap: 16px; }
     .hero-service-item { border-right: none; margin-right: 0; flex: 0 0 45%; }
+    
     .services-header { flex-direction: column; align-items: flex-start; gap: 16px; }
     .services-grid { grid-template-columns: 1fr; }
+    
+    .portfolio-grid { grid-template-columns: 1fr; gap: 30px; }
+    
     .proceso-inner { grid-template-columns: 1fr; }
     .proceso-visual { display: none; }
     .porqué-grid { grid-template-columns: 1fr; }
@@ -494,18 +653,23 @@
 
 <!-- NAV -->
 <nav>
-  <a href="#" class="nav-logo"><img src="logo-imagin8.png" alt="imagin8" style="height:32px;"></a>
-  <ul class="nav-links">
+  <a href="#" class="nav-logo"><img src="assets/hero-bg-8.png" alt="imagin8" style="height:32px;"></a>
+  <ul class="nav-links" id="navLinks">
     <li><a href="#servicios">Servicios</a></li>
     <li><a href="#proceso">Proceso</a></li>
     <li><a href="#nosotros">Nosotros</a></li>
     <li><a href="#contacto" class="nav-cta">Hablemos</a></li>
   </ul>
+  <button class="nav-toggle" id="navToggle" aria-label="Abrir menú">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
 </nav>
 
 <!-- HERO -->
 <section class="hero">
-  <img class="hero-bg-8" src="data:image/png;base64,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" alt="">
+  <canvas id="heroCanvas" class="hero-bg-8"></canvas>
   <div class="hero-content">
     <div class="hero-tag">
       <span class="hero-tag-dot"></span>
@@ -554,6 +718,7 @@
   <div class="services-grid">
 
     <div class="service-card reveal">
+      <div class="service-card-bg-img" style="background-image: url('assets/portfolio-branding.png');"></div>
       <div class="service-card-num">01 — DISEÑO GRÁFICO</div>
       <span class="service-card-icon">✦</span>
       <h3 class="service-card-title">Diseño visual para marcas con identidad.</h3>
@@ -570,22 +735,24 @@
     </div>
 
     <div class="service-card reveal" style="transition-delay:0.1s">
+      <div class="service-card-bg-img" style="background-image: url('assets/portfolio-photo.png');"></div>
       <div class="service-card-num">02 — FOTOGRAFÍA</div>
       <span class="service-card-icon">◎</span>
-      <h3 class="service-card-title">Fotografía profesional para marcas, espacios y experiencias.</h3>
-      <p class="service-card-desc">Realizamos fotografía comercial, corporativa, arquitectónica y de eventos, cuidando cada detalle visual para transmitir una imagen más sólida y profesional.</p>
+      <h3 class="service-card-title">Fotografía gastronómica y de producto de alto impacto.</h3>
+      <p class="service-card-desc">Creamos imágenes comerciales, gastronómicas y de producto de alta gama, cuidando al detalle la iluminación y el estilismo visual para destacar el valor de tu marca.</p>
       <div class="service-card-tags">
-        <span class="service-tag">Eventos &amp; Social</span>
-        <span class="service-tag">Corporativa</span>
-        <span class="service-tag">Producto</span>
         <span class="service-tag">Gastronómica</span>
-        <span class="service-tag">Arquitectura</span>
+        <span class="service-tag">Producto</span>
+        <span class="service-tag">E-commerce</span>
+        <span class="service-tag">Corporativa</span>
+        <span class="service-tag">Publicitaria</span>
         <span class="service-tag">Retoque profesional</span>
       </div>
       <div class="service-card-bg-num">F</div>
     </div>
 
     <div class="service-card reveal" style="transition-delay:0.2s">
+      <div class="service-card-bg-img" style="background-image: url('assets/portfolio-video.png');"></div>
       <div class="service-card-num">03 — VIDEO</div>
       <span class="service-card-icon">▶</span>
       <h3 class="service-card-title">Producción audiovisual para contenido y marca.</h3>
@@ -601,6 +768,7 @@
     </div>
 
     <div class="service-card reveal" style="transition-delay:0.3s">
+      <div class="service-card-bg-img" style="background-image: url('assets/portfolio-ai.png');"></div>
       <div class="service-card-num">04 — AUTOMATIZACIÓN IA</div>
       <span class="service-card-icon">⬡</span>
       <h3 class="service-card-title">Automatización inteligente aplicada a negocios.</h3>
@@ -617,10 +785,73 @@
   </div>
 </section>
 
+<!-- PORTAFOLIO -->
+<section class="portfolio" id="portafolio">
+  <div class="portfolio-header reveal">
+    <div>
+      <p class="section-label">Portafolio</p>
+      <h2 class="section-title">Trabajos.<br>Proyectos.<br>Casos de éxito.</h2>
+    </div>
+    <p class="section-sub">Una selección de proyectos recientes que integran diseño, producción audiovisual y tecnología inteligente.</p>
+  </div>
+
+  <div class="portfolio-grid">
+    
+    <!-- Item 1 -->
+    <div class="portfolio-item reveal">
+      <div class="portfolio-image-wrapper">
+        <img class="portfolio-img" src="assets/portfolio-branding.png" alt="Diseño de Branding">
+      </div>
+      <div class="portfolio-info">
+        <div class="portfolio-category">01 — Diseño Gráfico</div>
+        <h3 class="portfolio-title">Identidad de Marca &amp; Branding</h3>
+        <p class="portfolio-desc">Desarrollo integral de marca minimalista para un ecosistema tecnológico moderno.</p>
+      </div>
+    </div>
+
+    <!-- Item 2 -->
+    <div class="portfolio-item reveal" style="transition-delay:0.1s">
+      <div class="portfolio-image-wrapper">
+        <img class="portfolio-img" src="assets/portfolio-photo.png" alt="Fotografía Gastronómica y de Producto">
+      </div>
+      <div class="portfolio-info">
+        <div class="portfolio-category">02 — Fotografía</div>
+        <h3 class="portfolio-title">Fotografía Gastronómica &amp; Producto</h3>
+        <p class="portfolio-desc">Sesión fotográfica comercial de platos gourmet y empaques premium en Lima.</p>
+      </div>
+    </div>
+
+    <!-- Item 3 -->
+    <div class="portfolio-item reveal" style="transition-delay:0.2s">
+      <div class="portfolio-image-wrapper">
+        <img class="portfolio-img" src="assets/portfolio-video.png" alt="Producción Audiovisual">
+      </div>
+      <div class="portfolio-info">
+        <div class="portfolio-category">03 — Video</div>
+        <h3 class="portfolio-title">Contenido Audiovisual de Marca</h3>
+        <p class="portfolio-desc">Producción de spots comerciales cinematográficos y motion graphics.</p>
+      </div>
+    </div>
+
+    <!-- Item 4 -->
+    <div class="portfolio-item reveal" style="transition-delay:0.3s">
+      <div class="portfolio-image-wrapper">
+        <img class="portfolio-img" src="assets/portfolio-ai.png" alt="Soluciones Inteligencia Artificial">
+      </div>
+      <div class="portfolio-info">
+        <div class="portfolio-category">04 — Automatización IA</div>
+        <h3 class="portfolio-title">Plataforma Conversacional con IA</h3>
+        <p class="portfolio-desc">Estructuración de chatbot inteligente integrado a CRM para agendamiento automatizado.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
 <!-- PROCESO -->
 <section class="proceso" id="proceso">
   <div class="proceso-inner">
-    <div>
+    <div class="proceso-info">
       <p class="section-label reveal">Proceso</p>
       <h2 class="section-title reveal">Un proceso claro<br>y enfocado en<br>cada proyecto.</h2>
       <p class="section-sub reveal">Trabajamos de forma directa y organizada para desarrollar soluciones visuales y digitales alineadas con cada marca.</p>
@@ -656,7 +887,7 @@
       </div>
     </div>
     <div class="proceso-visual">
-      <div class="proceso-8">8</div>
+      <canvas id="procesoCanvas" style="opacity: 1.0; mix-blend-mode: screen; user-select: none; max-width: 100%;"></canvas>
     </div>
   </div>
 </section>
@@ -760,7 +991,7 @@
                 <option value="+56">🇨🇱 +56</option>
                 <option value="+57">🇨🇴 +57</option>
                 <option value="+506">🇨🇷 +506</option>
-                <option value="+593">🇪🇨 +593</option>
+                <option value="+593">🇪CU +593</option>
                 <option value="+503">🇸🇻 +503</option>
                 <option value="+502">🇬🇹 +502</option>
                 <option value="+504">🇭🇳 +504</option>
@@ -816,34 +1047,111 @@
 </footer>
 
 <script>
-  // Cursor
+  // Mobile navigation drawer toggle
+  const navToggle = document.getElementById('navToggle');
+  const navLinks = document.getElementById('navLinks');
+  
+  if (navToggle && navLinks) {
+    navToggle.addEventListener('click', () => {
+      navToggle.classList.toggle('active');
+      navLinks.classList.toggle('active');
+    });
+
+    // Close menu when clicking on links
+    navLinks.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        navToggle.classList.remove('active');
+        navLinks.classList.remove('active');
+      });
+    });
+  }
+
+  // Cursor rendering with transform3d for hardware acceleration
   const cursor = document.getElementById('cursor');
   const ring = document.getElementById('cursorRing');
   let mx = 0, my = 0, rx = 0, ry = 0;
-  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+  
+  // Track cursor position
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX;
+    my = e.clientY;
+  });
+  
+  // Custom cursor loop
   function animateCursor() {
-    cursor.style.left = (mx - 5) + 'px';
-    cursor.style.top = (my - 5) + 'px';
+    cursor.style.transform = `translate3d(${mx - 5}px, ${my - 5}px, 0)`;
+    
     rx += (mx - rx) * 0.12;
     ry += (my - ry) * 0.12;
-    ring.style.left = (rx - 18) + 'px';
-    ring.style.top = (ry - 18) + 'px';
+    ring.style.transform = `translate3d(${rx - 18}px, ${ry - 18}px, 0)`;
+    
     requestAnimationFrame(animateCursor);
   }
-  animateCursor();
-  document.querySelectorAll('a, button, .service-card').forEach(el => {
-    el.addEventListener('mouseenter', () => { ring.style.width = '56px'; ring.style.height = '56px'; ring.style.opacity = '0.8'; });
-    el.addEventListener('mouseleave', () => { ring.style.width = '36px'; ring.style.height = '36px'; ring.style.opacity = '0.5'; });
-  });
+  
+  // Disable custom cursor on mobile touch screens
+  if (window.matchMedia('(min-width: 769px)').matches) {
+    animateCursor();
+    
+    document.querySelectorAll('a, button, .service-card, .portfolio-item').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        ring.style.width = '56px';
+        ring.style.height = '56px';
+        ring.style.opacity = '0.8';
+        ring.style.transform = `translate3d(${rx - 28}px, ${ry - 28}px, 0)`;
+      });
+      el.addEventListener('mouseleave', () => {
+        ring.style.width = '36px';
+        ring.style.height = '36px';
+        ring.style.opacity = '0.5';
+        ring.style.transform = `translate3d(${rx - 18}px, ${ry - 18}px, 0)`;
+      });
+    });
+  } else {
+    // Hide cursor elements on mobile devices
+    if (cursor) cursor.style.display = 'none';
+    if (ring) ring.style.display = 'none';
+    document.body.style.cursor = 'default';
+  }
 
-  // Scroll reveal
+  // Interactive Service Cards Hover Effects (Parallax + Spotlight Glow)
+  if (window.matchMedia('(min-width: 769px)').matches) {
+    document.querySelectorAll('.service-card').forEach(card => {
+      card.addEventListener('mousemove', e => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        // Spotlight coordinates
+        card.style.setProperty('--mouse-x', `${x}px`);
+        card.style.setProperty('--mouse-y', `${y}px`);
+        
+        // Parallax shifts (range -12px to 12px)
+        const px = -((x - rect.width / 2) / rect.width) * 12;
+        const py = -((y - rect.height / 2) / rect.height) * 12;
+        card.style.setProperty('--px', `${px}px`);
+        card.style.setProperty('--py', `${py}px`);
+      });
+      
+      card.addEventListener('mouseleave', () => {
+        card.style.setProperty('--px', '0px');
+        card.style.setProperty('--py', '0px');
+      });
+    });
+  }
+
+
+  // Scroll reveal utilizing IntersectionObserver
   const reveals = document.querySelectorAll('.reveal');
   const obs = new IntersectionObserver((entries) => {
-    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+      }
+    });
   }, { threshold: 0.12 });
   reveals.forEach(r => obs.observe(r));
 
-  // Form submit — Formspree
+  // Form submit using Fetch to Formspree
   document.getElementById('form-submit-btn').addEventListener('click', async function() {
     const nombre     = document.getElementById('f-nombre').value.trim();
     const telefono   = document.getElementById('phonePrefixSelect').value + ' ' + document.getElementById('f-telefono').value.trim();
@@ -874,7 +1182,7 @@
         document.getElementById('form-fields').style.display = 'none';
         document.getElementById('form-success').style.display = 'block';
       } else {
-        throw new Error('Error');
+        throw new Error('Error al enviar');
       }
     } catch(e) {
       errorEl.textContent = 'Hubo un error al enviar. Intenta de nuevo o escríbenos directamente.';
@@ -883,6 +1191,580 @@
       btn.disabled = false;
     }
   });
+
+  // Canvas Particles Effect
+  const canvas = document.getElementById('heroCanvas');
+  if (canvas) {
+    const ctx = canvas.getContext('2d');
+    
+    // Set canvas dimensions
+    let w = 2000;
+    let h = 850;
+    canvas.width = w;
+    canvas.height = h;
+
+    // Helper function for fading elements near boundaries
+    function getEdgeFade(x, y, w, h) {
+      const padLeft = 150;   // Fade zone on the left
+      const padRight = 80;   // Fade zone on the right
+      const padTop = 80;     // Fade zone on the top
+      const padBottom = 120; // Fade zone on the bottom (wider to clear services strip nicely!)
+      
+      let fadeX = 1;
+      let fadeY = 1;
+      
+      if (x < padLeft) {
+        fadeX = x / padLeft;
+      } else if (x > w - padRight) {
+        fadeX = (w - x) / padRight;
+      }
+      
+      if (y < padTop) {
+        fadeY = y / padTop;
+      } else if (y > h - padBottom) {
+        fadeY = (h - y) / padBottom;
+      }
+      
+      return Math.max(0, Math.min(1, fadeX * fadeY));
+    }
+    
+    let particles = [];
+    let mouse = { x: -1000, y: -1000, active: false };
+    
+    // Track mouse positioning relative to canvas
+    window.addEventListener('mousemove', e => {
+      const rect = canvas.getBoundingClientRect();
+      mouse.x = e.clientX - rect.left;
+      mouse.y = e.clientY - rect.top;
+      
+      // Check if mouse is inside canvas bounds
+      if (e.clientX >= rect.left && e.clientX <= rect.right &&
+          e.clientY >= rect.top && e.clientY <= rect.bottom) {
+        mouse.active = true;
+      } else {
+        mouse.active = false;
+      }
+    });
+    
+    canvas.addEventListener('mouseleave', () => {
+      mouse.active = false;
+      mouse.x = -1000;
+      mouse.y = -1000;
+    });
+
+    const img = new Image();
+    // Load from assets folder. Ensure you run a local web server (like http-server) to avoid CORS issues.
+    img.src = 'assets/canvas-8.png';
+    img.onload = function() {
+      try {
+        // Create offscreen canvas for pixel extraction
+        const offscreen = document.createElement('canvas');
+        const oCtx = offscreen.getContext('2d');
+        // Scale down image to have a reasonable amount of particles (approx 1200 particles)
+        const scale = 200;
+        offscreen.width = scale;
+        offscreen.height = scale;
+        
+        // Calculate aspect ratio to avoid distortion (squishing)
+        let drawWidth = scale;
+        let drawHeight = scale;
+        let offsetX = 0;
+        let offsetY = 0;
+        
+        if (img.width > img.height) {
+          drawHeight = scale * (img.height / img.width);
+          offsetY = (scale - drawHeight) / 2;
+        } else {
+          drawWidth = scale * (img.width / img.height);
+          offsetX = (scale - drawWidth) / 2;
+        }
+        
+        // Clear offscreen canvas and draw image keeping aspect ratio centered
+        oCtx.fillStyle = 'rgba(0,0,0,0)';
+        oCtx.fillRect(0, 0, scale, scale);
+        oCtx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+        
+        let imgData;
+        try {
+          imgData = oCtx.getImageData(0, 0, scale, scale).data;
+        } catch (corsErr) {
+          console.error("No se pudo obtener la información de píxeles (debido a CORS al abrir el archivo localmente con file://). Por favor, ejecuta un servidor local para visualizar las partículas.", corsErr);
+          return;
+        }
+        
+        // Extract non-transparent pixels
+        for (let y = 0; y < scale; y++) {
+          for (let x = 0; x < scale; x++) {
+            const idx = (y * scale + x) * 4;
+            const alpha = imgData[idx + 3];
+            const r = imgData[idx];
+            const g = imgData[idx + 1];
+            const b = imgData[idx + 2];
+            
+            // Select pixel if transparent is false and color is present (not dark/black background)
+            if (alpha > 128) {
+              // Map coordinates to 500x500 main canvas with some padding (using 1200 as base width to keep "8" to the right)
+              const tx = (x / scale) * (h * 2.08) + (1200 - h * 2.08) / 2 + (w - 1200);
+              const ty = (y / scale) * (h * 2.08) - (h * 0.54);
+              
+              particles.push({
+                x: Math.random() * w,
+                y: Math.random() * h,
+                tx: tx,
+                ty: ty,
+                vx: 0,
+                vy: 0,
+                cooldown: 0,
+                size: Math.random() * 0.8 + 0.6,
+                colorBase: Math.random() > 0.3 ? "241, 90, 36" : "255, 122, 77"
+              });
+            }
+          }
+        }
+        
+        // Start loop
+        requestAnimationFrame(runParticles);
+      } catch (err) {
+        console.error("Canvas particle extraction failed:", err);
+      }
+    };
+    
+    const servicesList = [
+      "Diseño gráfico",
+      "Fotografía",
+      "Video",
+      "Automatización con IA"
+    ];
+    
+    let activeTexts = []; // Almacena múltiples textos en reproducción
+    let framesSinceLastText = 999; // Contador de frames para el intervalo de aparición
+    let lastServiceTriggered = ""; // Previene duplicados consecutivos
+  
+    let time = 0;
+    function runParticles() {
+      ctx.clearRect(0, 0, w, h);
+      time += 0.0025;
+      let isTouching8 = false;
+      framesSinceLastText++; // Incrementar contador de fotogramas
+      
+      // Subtle float offsets for the whole shape
+      const floatX = Math.sin(time) * 8;
+      const floatY = Math.cos(time * 0.8) * 12;
+      
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        
+        // Calculate physics
+        let ax = 0;
+        let ay = 0;
+        
+        // Target positioning including floating motion
+        const currTx = p.tx + floatX;
+        const currTy = p.ty + floatY;
+        
+        // Físicas de interacción y desintegración temporizada
+        let dx = p.x - mouse.x;
+        let dy = p.y - mouse.y;
+        let dist = Math.sqrt(dx * dx + dy * dy);
+        const radius = 90; // Rango de detección un poco más amplio
+        
+        if (dist < radius && mouse.active) {
+          // Empujamos las partículas con fuerza hacia afuera
+          const force = (radius - dist) / radius;
+          const angle = Math.atan2(dy, dx);
+          const strength = force * 15; // Primera aceleración rápida
+          ax = Math.cos(angle) * strength + (Math.random() - 0.5) * 3;
+          ay = Math.sin(angle) * strength + (Math.random() - 0.5) * 3;
+          
+          // Iniciamos la cuenta de 3 segundos (180 frames) para desintegrar
+          p.cooldown = 180;
+          isTouching8 = true;
+        } else {
+          if (p.cooldown > 0) {
+            p.cooldown--;
+            // Flotación libre sutil a la deriva
+            ax = (Math.random() - 0.5) * 0.15;
+            ay = (Math.random() - 0.5) * 0.15;
+          } else {
+            // Reintegración muy lenta y suave a la forma original (0.004 de atracción)
+            ax = (currTx - p.x) * 0.004;
+            ay = (currTy - p.y) * 0.004;
+          }
+        }
+        
+        // Friction and velocity updates
+        const friction = p.cooldown > 0 ? 0.98 : 0.94;
+        p.vx = (p.vx + ax) * friction;
+        p.vy = (p.vy + ay) * friction;
+        
+        p.x += p.vx;
+        p.y += p.vy;
+        
+        // Draw particle with edge fading
+        const edgeFade = getEdgeFade(p.x, p.y, w, h);
+        ctx.fillStyle = `rgba(${p.colorBase}, ${0.35 * edgeFade})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      
+      // Disparador de un nuevo texto de servicio (cada 140 frames si se sigue tocando)
+      if (isTouching8 && framesSinceLastText >= 140) {
+        framesSinceLastText = 0;
+        
+        // Evitar duplicación consecutiva y cualquier duplicado activo en pantalla
+        const activeNames = activeTexts.map(t => t.service);
+        const availableServices = servicesList.filter(s => s !== lastServiceTriggered && !activeNames.includes(s));
+        
+        // Si todos están activos, usamos cualquiera menos el último
+        const finalAvailable = availableServices.length > 0 ? availableServices : servicesList.filter(s => s !== lastServiceTriggered);
+        
+        const randomService = finalAvailable[Math.floor(Math.random() * finalAvailable.length)];
+        lastServiceTriggered = randomService;
+        
+        const scaleFactor = Math.random() * 0.5 + 0.5; // Tamaño aleatorio (variando entre 50% y 100% de la escala máxima)
+        
+        // Angulo de explosión hacia arriba y los costados (-0.2PI a -0.8PI)
+        const angle = (Math.random() * 0.6 + 0.2) * -Math.PI;
+        const speed = Math.random() * 8 + 8; // Velocidad explosiva inicial alta
+        const initialVx = Math.cos(angle) * speed;
+        const initialVy = Math.sin(angle) * speed;
+        
+        // Alternancia aleatoria de color: 65% blancos, 35% naranjas
+        const isOrange = Math.random() < 0.35;
+        const colorBase = isOrange ? "241, 90, 36" : "255, 255, 255";
+        
+        activeTexts.push({
+          service: randomService,
+          // Spawnea cerca del cursor para máxima interactividad
+          x: mouse.x + (Math.random() - 0.5) * 40,
+          y: mouse.y + (Math.random() - 0.5) * 40,
+          vx: initialVx,
+          vy: initialVy,
+          driftX: (Math.random() - 0.5) * 0.1,
+          driftY: -0.15, // Planeo sutil hacia arriba
+          scaleFactor: scaleFactor,
+          colorBase: colorBase,
+          progress: 0
+        });
+      }
+      
+      // Renderizado dinámico de todas las palabras activas en pantalla
+      for (let i = activeTexts.length - 1; i >= 0; i--) {
+        const pText = activeTexts[i];
+        pText.progress += 0.0035; // 4.5 segundos de duración
+        
+        if (pText.progress >= 1) {
+          activeTexts.splice(i, 1); // Remover texto completado
+        } else {
+          // Rampa de velocidad: Desaceleración explosiva rápida mediante fricción, sumando planeo sutil
+          pText.vx *= 0.88;
+          pText.vy *= 0.88;
+          pText.x += pText.vx + pText.driftX;
+          pText.y += pText.vy + pText.driftY;
+          
+          let scale = 0;
+          let opacity = 0;
+          
+          if (pText.progress <= 0.3) {
+            // Fase de entrada y crecimiento rápido: opacidad de 0% a 15%
+            const t = pText.progress / 0.3;
+            scale = (0.2 + 1.0 * t) * pText.scaleFactor;
+            opacity = t * 0.15;
+          } else {
+            // Fase de planeo lento, expansión sutil y desvanecimiento: opacidad de 15% a 0%
+            const t = (pText.progress - 0.3) / 0.7;
+            scale = (1.2 + 0.3 * t) * pText.scaleFactor;
+            opacity = 0.15 * Math.pow(1 - t, 2);
+          }
+          
+          // Apply edge fading to the text
+          const edgeFade = getEdgeFade(pText.x, pText.y, w, h);
+          const finalOpacity = opacity * edgeFade;
+          
+          ctx.save();
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          const baseFontSize = 75;
+          const currentFontSize = Math.round(baseFontSize * scale);
+          ctx.font = `800 ${currentFontSize}px 'Josefin Sans', sans-serif`;
+          ctx.fillStyle = `rgba(${pText.colorBase}, ${finalOpacity})`;
+          ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
+          ctx.shadowBlur = 8;
+          ctx.fillText(pText.service, pText.x, pText.y);
+          ctx.restore();
+        }
+      }
+      
+      requestAnimationFrame(runParticles);
+    }
+  }
+
+  // Canvas Proceso Particles Effect
+  const canvasProceso = document.getElementById('procesoCanvas');
+  if (canvasProceso) {
+    const ctx = canvasProceso.getContext('2d');
+    
+    let w = canvasProceso.clientWidth || 950;
+    let h = canvasProceso.clientHeight || 750;
+    canvasProceso.width = w;
+    canvasProceso.height = h;
+    
+    let particles = [];
+    let mouse = { x: -1000, y: -1000, active: false };
+    
+    // Track mouse positioning relative to proceso canvas
+    window.addEventListener('mousemove', e => {
+      const rect = canvasProceso.getBoundingClientRect();
+      mouse.x = e.clientX - rect.left;
+      mouse.y = e.clientY - rect.top;
+      
+      if (e.clientX >= rect.left && e.clientX <= rect.right &&
+          e.clientY >= rect.top && e.clientY <= rect.bottom) {
+        mouse.active = true;
+      } else {
+        mouse.active = false;
+      }
+    });
+    
+    canvasProceso.addEventListener('mouseleave', () => {
+      mouse.active = false;
+      mouse.x = -1000;
+      mouse.y = -1000;
+    });
+
+    const img = new Image();
+    img.src = 'assets/canvas-8.png';
+    img.onload = function() {
+      try {
+        const offscreen = document.createElement('canvas');
+        const oCtx = offscreen.getContext('2d');
+        const scale = 200; // Increased back for a larger canvas density
+        offscreen.width = scale;
+        offscreen.height = scale;
+        
+        let drawWidth = scale;
+        let drawHeight = scale;
+        let offsetX = 0;
+        let offsetY = 0;
+        
+        if (img.width > img.height) {
+          drawHeight = scale * (img.height / img.width);
+          offsetY = (scale - drawHeight) / 2;
+        } else {
+          drawWidth = scale * (img.width / img.height);
+          offsetX = (scale - drawWidth) / 2;
+        }
+        
+        oCtx.fillStyle = 'rgba(0,0,0,0)';
+        oCtx.fillRect(0, 0, scale, scale);
+        oCtx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+        
+        const imgData = oCtx.getImageData(0, 0, scale, scale).data;
+        
+        for (let y = 0; y < scale; y++) {
+          for (let x = 0; x < scale; x++) {
+            const idx = (y * scale + x) * 4;
+            const alpha = imgData[idx + 3];
+            
+            if (alpha > 128) {
+              // Make the 8 giant (scale 1.72) and center it horizontally, aligning it to show the top loop
+              const tx = (x / scale - 0.5) * (h * 1.72) + (w / 2 - 50);
+              const ty = (y / scale) * (h * 1.72) - 180;
+              
+              particles.push({
+                x: Math.random() * w,
+                y: Math.random() * h,
+                tx: tx,
+                ty: ty,
+                vx: 0,
+                vy: 0,
+                cooldown: 0,
+                size: Math.random() * 0.8 + 0.6,
+                colorBase: Math.random() > 0.3 ? "241, 90, 36" : "255, 122, 77"
+              });
+            }
+          }
+        }
+        
+        requestAnimationFrame(runProcesoParticles);
+      } catch (err) {
+        console.error("Proceso canvas particle extraction failed:", err);
+      }
+    };
+    
+    const stepsList = [
+      "Idea",
+      "Dirección",
+      "Producción",
+      "Optimización"
+    ];
+    
+    let activeTexts = [];
+    let framesSinceLastText = 999;
+    let lastStepTriggered = "";
+    let time = 0;
+    
+    function getEdgeFade(x, y, w, h) {
+      const padLeft = 30;  // Narrow fade zone for an elegant, subtle transition at the edges
+      const padRight = 30;
+      const padTop = 30;
+      const padBottom = 30;
+      
+      let fadeX = 1;
+      let fadeY = 1;
+      
+      if (x < padLeft) {
+        fadeX = x / padLeft;
+      } else if (x > w - padRight) {
+        fadeX = (w - x) / padRight;
+      }
+      
+      if (y < padTop) {
+        fadeY = y / padTop;
+      } else if (y > h - padBottom) {
+        fadeY = (h - y) / padBottom;
+      }
+      
+      return Math.max(0, Math.min(1, fadeX * fadeY));
+    }
+    
+    function runProcesoParticles() {
+      ctx.clearRect(0, 0, w, h);
+      time += 0.0025;
+      let isTouching8 = false;
+      framesSinceLastText++;
+      
+      const floatX = Math.sin(time) * 5;
+      const floatY = Math.cos(time * 0.8) * 8;
+      
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        
+        let ax = 0;
+        let ay = 0;
+        
+        const currTx = p.tx + floatX;
+        const currTy = p.ty + floatY;
+        
+        let dx = p.x - mouse.x;
+        let dy = p.y - mouse.y;
+        let dist = Math.sqrt(dx * dx + dy * dy);
+        const radius = 60;
+        
+        if (dist < radius && mouse.active) {
+          const force = (radius - dist) / radius;
+          const angle = Math.atan2(dy, dx);
+          const strength = force * 12;
+          ax = Math.cos(angle) * strength + (Math.random() - 0.5) * 2;
+          ay = Math.sin(angle) * strength + (Math.random() - 0.5) * 2;
+          p.cooldown = 180;
+          isTouching8 = true;
+        } else {
+          if (p.cooldown > 0) {
+            p.cooldown--;
+            ax = (Math.random() - 0.5) * 0.15;
+            ay = (Math.random() - 0.5) * 0.15;
+          } else {
+            ax = (currTx - p.x) * 0.004;
+            ay = (currTy - p.y) * 0.004;
+          }
+        }
+        
+        const friction = p.cooldown > 0 ? 0.98 : 0.94;
+        p.vx = (p.vx + ax) * friction;
+        p.vy = (p.vy + ay) * friction;
+        
+        p.x += p.vx;
+        p.y += p.vy;
+        
+        const edgeFade = getEdgeFade(p.x, p.y, w, h);
+        ctx.fillStyle = `rgba(${p.colorBase}, ${0.35 * edgeFade})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      
+      // Trigger new process step text
+      if (isTouching8 && framesSinceLastText >= 140) {
+        framesSinceLastText = 0;
+        
+        const activeNames = activeTexts.map(t => t.service);
+        const availableSteps = stepsList.filter(s => s !== lastStepTriggered && !activeNames.includes(s));
+        const finalAvailable = availableSteps.length > 0 ? availableSteps : stepsList.filter(s => s !== lastStepTriggered);
+        const randomStep = finalAvailable[Math.floor(Math.random() * finalAvailable.length)];
+        lastStepTriggered = randomStep;
+        
+        const scaleFactor = Math.random() * 0.4 + 0.6; // Scale between 60% and 100%
+        
+        const angle = (Math.random() * 0.6 + 0.2) * -Math.PI;
+        const speed = Math.random() * 5 + 5;
+        const initialVx = Math.cos(angle) * speed;
+        const initialVy = Math.sin(angle) * speed;
+        
+        const isOrange = Math.random() < 0.35;
+        const colorBase = isOrange ? "241, 90, 36" : "255, 255, 255";
+        
+        activeTexts.push({
+          service: randomStep,
+          x: mouse.x + (Math.random() - 0.5) * 20,
+          y: mouse.y + (Math.random() - 0.5) * 20,
+          vx: initialVx,
+          vy: initialVy,
+          driftX: (Math.random() - 0.5) * 0.1,
+          driftY: -0.15,
+          scaleFactor: scaleFactor,
+          colorBase: colorBase,
+          progress: 0
+        });
+      }
+      
+      // Render process texts
+      for (let i = activeTexts.length - 1; i >= 0; i--) {
+        const pText = activeTexts[i];
+        pText.progress += 0.0045; // 3.7 seconds duration
+        
+        if (pText.progress >= 1) {
+          activeTexts.splice(i, 1);
+        } else {
+          pText.vx *= 0.88;
+          pText.vy *= 0.88;
+          pText.x += pText.vx + pText.driftX;
+          pText.y += pText.vy + pText.driftY;
+          
+          let scale = 0;
+          let opacity = 0;
+          
+          if (pText.progress <= 0.3) {
+            const t = pText.progress / 0.3;
+            scale = (0.2 + 1.0 * t) * pText.scaleFactor;
+            opacity = t * 0.15;
+          } else {
+            const t = (pText.progress - 0.3) / 0.7;
+            scale = (1.2 + 0.3 * t) * pText.scaleFactor;
+            opacity = 0.15 * Math.pow(1 - t, 2);
+          }
+          
+          const edgeFade = getEdgeFade(pText.x, pText.y, w, h);
+          const finalOpacity = opacity * edgeFade;
+          
+          ctx.save();
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          const baseFontSize = 60; // Larger font size for larger process canvas
+          const currentFontSize = Math.round(baseFontSize * scale);
+          ctx.font = `800 ${currentFontSize}px 'Josefin Sans', sans-serif`;
+          ctx.fillStyle = `rgba(${pText.colorBase}, ${finalOpacity})`;
+          ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
+          ctx.shadowBlur = 6;
+          ctx.fillText(pText.service, pText.x, pText.y);
+          ctx.restore();
+        }
+      }
+      
+      requestAnimationFrame(runProcesoParticles);
+    }
+  }
 </script>
 </body>
 </html>
